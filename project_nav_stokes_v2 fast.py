@@ -4,7 +4,6 @@ import numpy as np
 from matplotlib.collections import LineCollection
 from pprint import pprint
 from os.path import join as ospathjoin
-from classes import *
 
 
 ## CONSTANTS
@@ -38,7 +37,7 @@ convergence_tol = 1e-16
 
 ## COMPUTATIONAL DOMAIN
 
-(nx,ny), (x_inp, y_inp) = Grid.from_file(filepath=GRID_FILENAME)
+(nx,ny), (x_inp, y_inp) = readgrid(filepath=GRID_FILENAME)
 
 x = np.zeros((nx+2, ny+2))
 y = np.zeros((nx+2, ny+2))
