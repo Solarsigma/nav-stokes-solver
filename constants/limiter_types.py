@@ -1,0 +1,3 @@
+NONE_LIMITER = 'none'
+MINMOD_LIMITER = 'minmod'
+SUPERBEE_LIMITER = 'superbee'
