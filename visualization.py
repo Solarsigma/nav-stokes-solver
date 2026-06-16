@@ -1,18 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 from os.path import join as ospathjoin
+from constants.fluid_properties import *
+from state import get_Qv
+from grid import Grid2D
 
 ORDER = 3
 LIMITER = 'minmod'
 ENV = 'prod'
-# GRID_FILENAME = 'g65x49u.dat' if ENV == 'prod' else 'g33x25u.dat'
-FILE_NAME_SUFFIX = f'{ENV}_euler_inviscid_order_{ORDER}_limiter_{LIMITER}'
+FILE_NAME_SUFFIX = f'{ENV}_nav_stokes_order_{ORDER}_limiter_{LIMITER}'
+GRID_FILENAME = 'g65x65s.dat'
+GRID_FILEPATH = 'mesh'
+FILE_PATH = 'data'
 
-Q = np.load(f'Q_{FILE_NAME_SUFFIX}.npy')
+grid = Grid2D(ospathjoin(GRID_FILEPATH, GRID_FILENAME))
 
-l2_err_norms = np.load(f'l2_err_norms_{FILE_NAME_SUFFIX}.npy')
+Q = np.load(ospathjoin(FILE_PATH, f'Q_{FILE_NAME_SUFFIX}.npy'))
 
-linf_err_norms = np.load(f'linf_err_norms_{FILE_NAME_SUFFIX}.npy')
+l2_err_norms = np.load(ospathjoin(FILE_PATH, f'l2_err_norms_{FILE_NAME_SUFFIX}.npy'))
+
+linf_err_norms = np.load(ospathjoin(FILE_PATH, f'linf_err_norms_{FILE_NAME_SUFFIX}.npy'))
 
 curr_iter = l2_err_norms.shape[0]
 
@@ -47,8 +55,6 @@ for k in range(4):
     ax.semilogy(
         iters,
         l2_plot[:, k],
-        # marker='o',
-        # markersize=3,
         label=var_labels[k]
     )
 
@@ -84,3 +90,27 @@ plt.tight_layout()
 
 plt.savefig(ospathjoin("plots", f"linf_convergence_{FILE_NAME_SUFFIX}.png"), dpi=300)
 plt.show()
+
+
+x,y = grid.coords
+nx,ny = grid.n
+xc,yc = grid.cell_centers
+
+Qv_steady = get_Qv(Q[-1])
+
+mesh = np.asarray([[[x[i,j], y[i,j]] for j in range(1, ny+1)] for i in range(1, nx+1)])
+
+plt.figure()
+
+plt.pcolormesh(xc[1:-1,1:-1], yc[1:-1,1:-1], Qv_steady[2,1:-1,1:-1])
+plt.colorbar()
+plt.title("v")
+
+segs1 = mesh
+segs2 = segs1.transpose(1,0,2)
+plt.gca().add_collection(LineCollection(segs1, color='black', linewidths=0.2))
+plt.gca().add_collection(LineCollection(segs2, color='black', linewidths=0.2))
+plt.gca().autoscale()
+
+plt.show()
+# plt.savefig(ospathjoin('plots', f"v_{FILE_NAME_SUFFIX}.png"), dpi=300)

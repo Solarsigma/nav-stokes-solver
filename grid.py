@@ -4,10 +4,10 @@ class Grid2D:
     def __init__(self, filename: str):
         self._read_file(filename)
         self._define_coords()
-        self._calculate_volumes()
-        self._calculate_cell_centers()
-        self._calculate_cell_surface_areas()
-        self._get_airfoil_limits()
+        self.cell_volumes = self._calculate_volumes()
+        self.cell_centers = self._calculate_cell_centers()
+        self.cell_surface_areas = self._calculate_cell_surface_areas()
+        self.airfoil_start, self.airfoil_end = self._get_airfoil_limits()
 
     def _read_file(self, filename: str):
         '''
@@ -65,7 +65,7 @@ class Grid2D:
         vol = np.zeros((nx+1, ny+1))
         vol = 0.5*((x[1:,1:] - x[:-1,:-1]) * (y[:-1, 1:] - y[1:, :-1])
                     - (x[:-1, 1:] - x[1:, :-1]) * (y[1:, 1:] - y[:-1, :-1]))
-        self.cell_volumes = vol
+        return vol
     
     def _calculate_cell_centers(self):
         x,y = self.coords
@@ -74,7 +74,7 @@ class Grid2D:
                     + x[:-1, 1:] + x[1:, 1:])
         yc = 0.25*(y[:-1, :-1] + y[1:, :-1]
                     + y[:-1, 1:] + y[1:, 1:])
-        self.cell_centers = (xc, yc)
+        return (xc, yc)
 
     def _calculate_cell_surface_areas(self):
         nx,ny = self.n
@@ -91,9 +91,8 @@ class Grid2D:
         s_eta[1, 1:,1:] = x[2:nx+1, 1:ny+1] - x[1:nx, 1:ny+1]
         s_eta[2] = (s_eta[0]**2 + s_eta[1]**2)**0.5
 
-        self.cell_surface_areas = (s_xi, s_eta)
+        return (s_xi, s_eta)
 
     def _get_airfoil_limits(self):
         x,_ = self.coords
-        self.airfoil_start = np.argwhere(x[1:,1] == 0)[0,0] + 1
-        self.airfoil_end = np.argwhere(x[1:,1] == 1)[0,0] + 1
+        return np.argwhere(x[1:,1] == 0)[0,0] + 1, np.argwhere(x[1:,1] == 1)[0,0] + 1

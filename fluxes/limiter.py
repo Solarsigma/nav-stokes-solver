@@ -1,4 +1,5 @@
-from constants import MINMOD_LIMITER, NONE_LIMITER, SUPERBEE_LIMITER
+import numpy as np
+from constants.limiter_types import *
 
 class FluxLimiterFactory:
     def __init__(self):
@@ -32,4 +33,4 @@ class MinmodLimiter(FluxLimiter):
 
 class SuperbeeLimiter(FluxLimiter):
     def apply(self, r):
-        np.fmax(0, np.fmax(np.fmin(2*r, 1), np.fmin(r, 2)))
+        return np.fmax(0, np.fmax(np.fmin(2*r, 1), np.fmin(r, 2)))

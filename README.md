@@ -1,4 +1,4 @@
 ### TODO
-- Continue beautification - fetch values from Grid2D whenever nx, ny, x, y, s, vol, etc are needed
-- Continue beautification - divide massive file into more files which can be read easily
+- Continue beautification - Divide Solver into Euclid solver and N-S solver
+- Continue beautification - Add factory method for flux calculation using Roe + MUSCL, AUSM etc.
 - Add AUSM scheme
