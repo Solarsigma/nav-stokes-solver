@@ -5,7 +5,7 @@ from os.path import join as ospathjoin
 from constants.fluid_properties import p_ref, u_ref, T_ref
 import config
 from grid import Grid2D
-from solver import Solver
+from solvers.steady_state import NavStokesSolver
 from state import get_Q
 
 ## CONSTANTS
@@ -26,7 +26,7 @@ grid = Grid2D(filename = ospathjoin(config.GRID_FILEPATH, config.GRID_FILENAME))
 
 Q0 = get_Q(p_ref, u_ref, 0, T_ref)
 Q_ref = np.asarray([Q0[0], Q0[1], Q0[1], Q0[3]])
-solver = Solver(grid=grid, Q_init=Q0)
+solver = NavStokesSolver(grid=grid, Q_init=Q0)
 
 ## TIME MARCHING
 
