@@ -93,63 +93,6 @@ def entropy_corrected_roe_vel(v, max_eigen):
     eps = 0.2*max_eigen
     return np.where(np.abs(v) > eps, np.abs(v), (v**2 + eps**2) / (2*eps))
 
-def get_roe_jacobian(Q_L, Q_R, s):
-    rho_L = Q_L[0]
-    u_L = Q_L[1] / rho_L
-    v_L = Q_L[2] / rho_L
-    p_L = (gamma - 1) * (Q_L[3] - 0.5*rho_L*(u_L**2 + v_L**2))
-    if rho_L < 0 or p_L < 0:
-        print("NEGATIVE DENSITY OR PRESSURE ENCOUNTERED!")
-        print(f"RHO: {rho_L}")
-        print(f"p: {p_L}")
-        input("Continue?")
-
-    ht_L = (Q_L[3] + p_L) / rho_L
-
-    rho_R = Q_R[0]
-    u_R = Q_R[1] / rho_R
-    v_R = Q_R[2] / rho_R
-    p_R = (gamma - 1) * (Q_R[3] - 0.5*rho_R*(u_R**2 + v_R**2))
-    ht_R = (Q_R[3] + p_R) / rho_R
-
-    rho_L_rt = np.sqrt(rho_L)
-    rho_R_rt = np.sqrt(rho_R)
-
-    nx = s[0] / s[2]
-    ny = s[1] / s[2]
-
-    u_f = (rho_L_rt * u_L + rho_R_rt * u_R) / (rho_L_rt + rho_R_rt)
-    v_f = (rho_L_rt * v_L + rho_R_rt * v_R) / (rho_L_rt + rho_R_rt)
-    ht_f = (rho_L_rt * ht_L + rho_R_rt * ht_R) / (rho_L_rt + rho_R_rt)
-    ek_f = 0.5*(u_f**2 + v_f**2)
-    c_f = np.sqrt((gamma - 1) * (ht_f - ek_f))
-    U = u_f*nx + v_f*ny
-
-    R = np.asarray([
-        [1,                     1,          1,                  0],
-        [u_f - c_f*nx,          u_f,        u_f + c_f*nx,       ny],
-        [v_f - c_f*ny,          v_f,        v_f + c_f*ny,       -nx],
-        [ht_f - U*c_f,          ek_f,       ht_f + U*c_f,       u_f*ny - v_f*nx]
-    ])
-
-    c_f_sq = c_f**2
-
-    L = np.asarray([
-        [((gamma - 1)*ek_f + U*c_f)/(2*c_f_sq),    ((1 - gamma)*u_f - c_f*nx)/(2*c_f_sq),      ((1 - gamma)*v_f - c_f*ny)/(2*c_f_sq),  (gamma - 1)/(2*c_f_sq) ],
-        [1 - (gamma - 1)*ek_f/c_f_sq,                   (gamma - 1)*u_f/c_f_sq,                     (gamma - 1)*v_f/c_f_sq,                 (1 - gamma)/c_f_sq],
-        [((gamma - 1)*ek_f - U*c_f)/(2*c_f_sq),    ((1 - gamma)*u_f + c_f*nx)/(2*c_f_sq),      ((1 - gamma)*v_f + c_f*ny)/(2*c_f_sq),  (gamma - 1)/(2*c_f_sq)],
-        [v_f*nx - u_f*ny,                               ny,                                         -nx,                                    0]
-    ])
-
-    Lambda = np.asarray([
-        [entropy_corrected_roe_vel(U - c_f, abs(U) + c_f),        0,          0,                  0],
-        [0,                     entropy_corrected_roe_vel(U, abs(U) + c_f),   0,                  0],
-        [0,                     0,          entropy_corrected_roe_vel(U + c_f, abs(U) + c_f),     0],
-        [0,                     0,          0,                  entropy_corrected_roe_vel(U, abs(U) + c_f)]
-    ])
-
-    return R @ Lambda @ L
-
 def get_E_xi(Q, s_xi):
     u = Q[1] / Q[0]
     v = Q[2] / Q[0]
