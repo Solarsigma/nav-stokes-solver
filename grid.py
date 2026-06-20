@@ -2,8 +2,17 @@ import numpy as np
 
 class Grid2D:
     def __init__(self, filename: str):
-        self._read_file(filename)
-        self._define_coords()
+        self.n, self.inp = self._read_file(filename)
+        self.coords = self._define_coords()
+        self.cell_volumes = self._calculate_volumes()
+        self.cell_centers = self._calculate_cell_centers()
+        self.cell_surface_areas = self._calculate_cell_surface_areas()
+        self.airfoil_start, self.airfoil_end = self._get_airfoil_limits()
+    
+    def __init__(self, n: tuple, inp: tuple):
+        self.n = n
+        self.inp = inp
+        self.coords = self._define_coords()
         self.cell_volumes = self._calculate_volumes()
         self.cell_centers = self._calculate_cell_centers()
         self.cell_surface_areas = self._calculate_cell_surface_areas()
@@ -35,8 +44,7 @@ class Grid2D:
         # when doing file I/O using "with open ..." you don't need to do file.close()
         # python automatically closes the file once the I/O processes are finished
 
-        self.n = (nx,ny)
-        self.inp = (x,y)
+        return (nx,ny), (x,y)
     
     def _define_coords(self):
         nx,ny = self.n
@@ -56,7 +64,7 @@ class Grid2D:
         y[nx+1, :] = y[nx, :]
         x[nx+1, :] = 2*x[nx, :] - x[nx-1, :]
 
-        self.coords = (x,y)
+        return (x,y)
     
     def _calculate_volumes(self):
         nx,ny = self.n
